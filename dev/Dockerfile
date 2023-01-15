@@ -17,7 +17,10 @@ RUN set -eux \
 
 
 # copy extra files
+COPY lighttpd-external.conf /etc/lighttpd/external.conf
+COPY 99-edns.conf /etc/dnsmasq.d/99-edns.conf
 COPY ./data/docker-entrypoint.sh /
+RUN chmod +x /unbound.sh
 
 
 # set version label
