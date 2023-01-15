@@ -1,4 +1,4 @@
-# pihole-bind 
+# pihole-bind [WIP][NOT TESTED]
 ![Docker Pulls](https://img.shields.io/docker/pulls/rlabinc/pihole-bind.svg?style=flat&label=pulls&logo=docker) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/rlabinc/pihole-bind/latest.svg?style=flat&label=image&logo=docker) [![Latest Build & Push](https://github.com/origamiofficial/docker-pihole-bind/actions/workflows/build-and-push-latest.yaml/badge.svg)](https://github.com/origamiofficial/docker-pihole-bind/actions/workflows/build-and-push-latest.yaml) ![GitHub Repo stars](https://img.shields.io/github/stars/origamiofficial/docker-pihole-bind?style=social)
 
 [pihole-bind](https://github.com/origamiofficial/docker-pihole-bind) is a Docker container to run [Pi-Hole](https://github.com/pi-hole/pi-hole) & [Bind](https://gitlab.isc.org/isc-projects/bind9) on the same container.
