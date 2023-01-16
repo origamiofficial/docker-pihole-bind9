@@ -20,7 +20,7 @@ RUN set -eux \
 COPY lighttpd-external.conf /etc/lighttpd/external.conf
 COPY 99-edns.conf /etc/dnsmasq.d/99-edns.conf
 COPY ./data/docker-entrypoint.sh /
-RUN chmod +x /unbound.sh
+RUN chmod +x /docker-entrypoint.sh
 
 
 # set version label
