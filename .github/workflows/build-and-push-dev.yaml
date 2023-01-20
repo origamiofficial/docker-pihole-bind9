@@ -17,7 +17,7 @@ jobs:
         name: Base image update check
         run: |
           BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/dev | grep -oP '"digest":"\K[^"]+' | tail -1)
-          PREVIOUS_DIGEST=$(cat Base_Digest)
+          PREVIOUS_DIGEST=$(cat ./dev/Base_Digest)
           if [ "$BASE_IMAGE_DIGEST" == "$PREVIOUS_DIGEST" ]; then
             echo "Base image has not been updated. Exiting..."
             exit 0
