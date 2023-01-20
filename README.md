@@ -36,11 +36,11 @@ docker run -d --name pihole-bind \
 ### Docker Tags
 The Docker tags supported by this image are:
 
-| Tag | Meaning | Type |
+| Tag | Description | Type |
 | :----: | :----: | ---- |
-| `latest` | This image is build every three days | Stable |
+| `latest` | Build from Pi-hole `latest` image | Stable |
 | `date` | Same as `latest` | Stable |
-| `dev` | This image is build daily | Beta |
+| `dev` | Build from Pi-hole `dev` image | Beta |
 
 Note: Date tag images aren't the same as the official ones, they're based on the build date.
 
