@@ -1,4 +1,4 @@
-# pihole-bind [WIP][NOT TESTED]
+# pihole-bind
 ![Docker Pulls](https://img.shields.io/docker/pulls/rlabinc/pihole-bind9.svg?style=flat&label=pulls&logo=docker) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/rlabinc/pihole-bind9/latest.svg?style=flat&label=image&logo=docker) [![Latest Build & Push](https://github.com/origamiofficial/docker-pihole-bind9/actions/workflows/build-and-push-latest.yaml/badge.svg)](https://github.com/origamiofficial/docker-pihole-bind9/actions/workflows/build-and-push-latest.yaml) ![GitHub Repo stars](https://img.shields.io/github/stars/origamiofficial/docker-pihole-bind9?style=social)
 
 [pihole-bind9](https://github.com/origamiofficial/docker-pihole-bind9) is a Docker container to run [Pi-Hole](https://github.com/pi-hole/pi-hole) & [Bind](https://gitlab.isc.org/isc-projects/bind9) on the same container.
@@ -80,7 +80,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-p 53:53/tcp -p 53:53/udp` | Default DNS port to use. |
 | `-p 80:80/tcp` | Specify Pi-hole web interface port. |
 | `-e WEBPASSWORD='qwerty123'` | Specify Pi-hole web interface password. It is better to use single quotes. |
-| `-e DNSSEC_VALIDATE=auto` | This variable defines the DNSSEC validation. |
+| `-e DNSSEC_VALIDATE=auto` | This variable defines the DNSSEC validation in Bind. |
 | `--restart=always` | To make sure "It's Always DNS" not happend. |
 
 This Docker container supports both Pi-hole official Docker container all environment variables available [here](https://github.com/pi-hole/docker-pi-hole/#environment-variables) & cytopia's docker-bind Docker container all environment variables available [here](https://github.com/cytopia/docker-bind#-environment-variables).
