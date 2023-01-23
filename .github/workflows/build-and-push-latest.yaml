@@ -52,7 +52,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind
+            ${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9
           flavor: |
             latest=true
           tags: |
@@ -73,9 +73,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind:buildcache.latest
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9:buildcache.latest
           cache-to: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind:buildcache.latest,mode=max
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9:buildcache.latest,mode=max
             
       -
         name: Update digest to file
@@ -93,7 +93,7 @@ jobs:
           fi
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git remote set-url origin https://${{ secrets.GIT_AUTH }}@github.com/origamiofficial/docker-pihole-bind.git
+          git remote set-url origin https://${{ secrets.GIT_AUTH }}@github.com/origamiofficial/docker-pihole-bind9.git
           git add ./latest/Base_Digest
           git commit -m "New Base Digest Updated"
           git push

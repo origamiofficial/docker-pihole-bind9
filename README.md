@@ -1,13 +1,13 @@
 # pihole-bind [WIP][NOT TESTED]
-![Docker Pulls](https://img.shields.io/docker/pulls/rlabinc/pihole-bind.svg?style=flat&label=pulls&logo=docker) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/rlabinc/pihole-bind/latest.svg?style=flat&label=image&logo=docker) [![Latest Build & Push](https://github.com/origamiofficial/docker-pihole-bind/actions/workflows/build-and-push-latest.yaml/badge.svg)](https://github.com/origamiofficial/docker-pihole-bind/actions/workflows/build-and-push-latest.yaml) ![GitHub Repo stars](https://img.shields.io/github/stars/origamiofficial/docker-pihole-bind?style=social)
+![Docker Pulls](https://img.shields.io/docker/pulls/rlabinc/pihole-bind9.svg?style=flat&label=pulls&logo=docker) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/rlabinc/pihole-bind9/latest.svg?style=flat&label=image&logo=docker) [![Latest Build & Push](https://github.com/origamiofficial/docker-pihole-bind9/actions/workflows/build-and-push-latest.yaml/badge.svg)](https://github.com/origamiofficial/docker-pihole-bind9/actions/workflows/build-and-push-latest.yaml) ![GitHub Repo stars](https://img.shields.io/github/stars/origamiofficial/docker-pihole-bind9?style=social)
 
-[pihole-bind](https://github.com/origamiofficial/docker-pihole-bind) is a Docker container to run [Pi-Hole](https://github.com/pi-hole/pi-hole) & [Bind](https://gitlab.isc.org/isc-projects/bind9) on the same container.
+[pihole-bind9](https://github.com/origamiofficial/docker-pihole-bind9) is a Docker container to run [Pi-Hole](https://github.com/pi-hole/pi-hole) & [Bind](https://gitlab.isc.org/isc-projects/bind9) on the same container.
 
 ## Supported Architectures
 
 We utilise the docker buildx for multi-platform awareness. More information is available from docker [here](https://docs.docker.com/buildx/working-with-buildx/).
 
-Simply pulling `rlabinc/pihole-bind:latest` should retrieve the correct image for your arch, but you can also pull specific arch images via `--platform`.
+Simply pulling `rlabinc/pihole-bind9:latest` should retrieve the correct image for your arch, but you can also pull specific arch images via `--platform`.
 
 The architectures supported by this image are:
 
@@ -22,7 +22,7 @@ The architectures supported by this image are:
 ## Usage
 Here are the commands you'll need:
 ```bash
-docker run -d --name pihole-bind \
+docker run -d --name pihole-bind9 \
   --name=pihole-bind \
   -e TZ=Europe/London `#optional` \
   -p 53:53/tcp -p 53:53/udp \
@@ -30,7 +30,7 @@ docker run -d --name pihole-bind \
   -e WEBPASSWORD='qwerty123' `#better to use single quotes` \
   -e DNSSEC_VALIDATE=auto \
   --restart=always \
-  rlabinc/pihole-bind:latest
+  rlabinc/pihole-bind9:latest
 ```
 
 ### Docker Tags
@@ -92,7 +92,7 @@ https://github.com/pi-hole/docker-pi-hole
 https://gitlab.isc.org/isc-projects/bind9
 
 ## Pi-hole Bind Github Repository
-https://github.com/origamiofficial/docker-pihole-bind
+https://github.com/origamiofficial/docker-pihole-bind9
 
 ## Acknowledgements
 The code in this image is heavily influenced by cytopia's docker-bind server Docker image configs,
@@ -106,4 +106,4 @@ However, the upstream projects most certainly also deserve credit for making thi
 
 I'm not responsible if your internet goes down using this Docker container. Use at your own risk.
 
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/origamiofficial/docker-pihole-bind&icon=github.svg&icon_color=%23FFFFFF&title=hits&edge_flat=false)](https://github.com/origamiofficial/docker-pihole-bind)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/origamiofficial/docker-pihole-bind9&icon=github.svg&icon_color=%23FFFFFF&title=hits&edge_flat=false)](https://github.com/origamiofficial/docker-pihole-bind9)
