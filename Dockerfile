@@ -1,4 +1,7 @@
-FROM pihole/pihole:dev
+# Define an ARG for the base image tag
+ARG BASE_IMG_TAG=none
+
+FROM pihole/pihole:${BASE_IMG_TAG}
 
 ENV \
 	USER=bind \
