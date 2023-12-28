@@ -73,9 +73,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9:buildcache.latest
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.latest
           cache-to: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9:buildcache.latest,mode=max
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.latest,mode=max
             
       -
         name: Update digest to file
