@@ -36,11 +36,11 @@ docker run -d --name pihole-bind9 \
 ### Docker Tags
 The Docker tags supported by this image are:
 
-| Tag | Description | Type |
-| :----: | :----: | ---- |
-| `latest` | Build from Pi-hole `latest` image | Stable |
-| `date` | Same as `latest` | Stable |
-| `dev` | Build from Pi-hole `dev` image | Beta |
+| Tag | Type |
+| :----: | :----: |
+| `latest` | Stable |
+| `date` | Stable |
+| `dev` | Beta |
 
 Note: Date tag images aren't the same as the official ones, they're based on the build date.
 
@@ -81,7 +81,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-p 80:80/tcp` | Specify Pi-hole web interface port. |
 | `-e WEBPASSWORD='qwerty123'` | Specify Pi-hole web interface password. It is better to use single quotes. |
 | `-e DNSSEC_VALIDATE=auto` | This variable defines the DNSSEC validation in Bind. |
-| `--restart=always` | To make sure "It's Always DNS" not happend. |
+| `--restart=always` | To make sure "It's Always DNS" does not happen. |
 
 This Docker container supports both Pi-hole official Docker container all environment variables available [here](https://github.com/pi-hole/docker-pi-hole/#environment-variables) & cytopia's docker-bind Docker container all environment variables available [here](https://github.com/cytopia/docker-bind#-environment-variables).
 
