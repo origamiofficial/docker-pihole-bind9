@@ -20,7 +20,7 @@ jobs:
         id: base_update_check
         run: |
           BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/dev | grep -oP '"digest":"\K[^"]+' | tail -1)
-          PREVIOUS_DIGEST=$(cat ./Dev_Base_Digest)
+          PREVIOUS_DIGEST=$(cat ./digest_base_dev)
           if [ "$BASE_IMAGE_DIGEST" == "$PREVIOUS_DIGEST" ]; then
             echo "Base image has not been updated. Exiting..."
             echo "build_image=false" >> $GITHUB_OUTPUT
@@ -76,13 +76,29 @@ jobs:
             type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.dev
           cache-to: |
             type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.dev,mode=max
-            
+      -
+        name: Version code
+        id: version_code_check
+        run: |
+          CHECK_VERSION_CODE=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/dev | grep -oP '"tag_last_pushed":"\K[^"]+' | tail -1 | cut -c 1-9 | sed 's/-/./g')
+          echo "New Version: $CHECK_VERSION_CODE"
+          echo VERSION_CODE=$CHECK_VERSION_CODE >> $GITHUB_OUTPUT
+      -
+        name: Create release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./digest_base_dev
+          release_name: dev-${{ steps.version_code_check.outputs.VERSION_CODE }}
+          tag: dev-${{ steps.version_code_check.outputs.VERSION_CODE }}
+          prerelease: true
+          overwrite: true
       -
         name: Update digest to file
         run: |
           BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/dev | grep -oP '"digest":"\K[^"]+' | tail -1)
           echo "New Digest: $BASE_IMAGE_DIGEST"
-          echo $BASE_IMAGE_DIGEST > ./Dev_Base_Digest
+          echo $BASE_IMAGE_DIGEST > ./digest_base_dev
       -
         name: Push changes to repository
         env:
@@ -94,6 +110,6 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/origamiofficial/docker-pihole-bind9.git
-          git add ./Dev_Base_Digest
+          git add ./digest_base_dev
           git commit -m "Base Digest Updated"
           git push

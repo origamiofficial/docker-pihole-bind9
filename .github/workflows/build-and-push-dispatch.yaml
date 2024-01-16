@@ -2,12 +2,23 @@ name: Manual Build & Push
 on:
   workflow_dispatch:
     inputs:
-      imageTag:
-        description: 'Image Tag'
+      BuildImageTag:
+        description: 'Build Image Tag'
         required: true
-        default: 'dev'
+        default: 'latest'
         type: choice
         options:
+        - development-v6
+        - dev
+        - latest
+        - beta
+      BaseImageTag:
+        description: 'Base Image Tag'
+        required: true
+        default: 'latest'
+        type: choice
+        options:
+        - development-v6
         - dev
         - latest
 
@@ -32,14 +43,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         env:
-          IMAGE_TAG: ${{ inputs.imageTag }}
+          IMAGE_TAG: ${{ inputs.BuildImageTag }}
         with:
           images: |
             ${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9
           flavor: |
             latest=false
           tags: |
-            type=raw,value=${{ inputs.imageTag }}
+            type=raw,value=${{ inputs.BuildImageTag }}
       -
         name: Login to DockerHub
         uses: docker/login-action@v3
@@ -47,18 +58,89 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
       -
-        name: Build and push
+        name: Build and push [latest / dev]
+        if: inputs.BaseImageTag == 'latest' || inputs.BaseImageTag == 'dev'
         uses: docker/build-push-action@v5
         env:
-          IMAGE_TAG: ${{ inputs.imageTag }}
+          IMAGE_TAG: ${{ inputs.BuildImageTag }}
         with:
           context: ./
           platforms: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6, linux/386
-          build-args: BASE_IMG_TAG=${{ inputs.imageTag }}
+          build-args: BASE_IMG_TAG=${{ inputs.BaseImageTag }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.${{ inputs.imageTag }}
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.${{ inputs.BaseImageTag }}
           cache-to: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.${{ inputs.imageTag }},mode=max
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.${{ inputs.BuildImageTag }},mode=max
+      -
+        name: Build and push [development-v6]
+        if: inputs.BaseImageTag == 'development-v6'
+        uses: docker/build-push-action@v5
+        env:
+          IMAGE_TAG: ${{ inputs.BuildImageTag }}
+        with:
+          context: ./
+          file: ./Dockerfile-Dev-V6
+          platforms: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6, linux/386
+          build-args: BASE_IMG_TAG=${{ inputs.BaseImageTag }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.${{ inputs.BaseImageTag }}
+          cache-to: |
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.${{ inputs.BuildImageTag }},mode=max
+      -
+        name: Version code
+        id: version_code_check
+        run: |
+          CHECK_VERSION_CODE=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/${{ inputs.BaseImageTag }} | grep -oP '"tag_last_pushed":"\K[^"]+' | tail -1 | cut -c 1-9 | sed 's/-/./g')
+          echo "New Version: $CHECK_VERSION_CODE"
+          echo VERSION_CODE=$CHECK_VERSION_CODE >> $GITHUB_OUTPUT
+      -
+        name: Create release [Release]
+        if: inputs.BaseImageTag == 'latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          body: |
+            ## What's Changed (Docker Image v${{ steps.version_code_check.outputs.VERSION_CODE }})
+            * Check Pi-hole Docker detailed changelog [here.](https://github.com/pi-hole/docker-pi-hole/releases/tag/${{ steps.version_code_check.outputs.VERSION_CODE }})
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./digest_base_latest
+          release_name: ${{ steps.version_code_check.outputs.VERSION_CODE }}
+          tag: ${{ steps.version_code_check.outputs.VERSION_CODE }}
+          make_latest: true
+          overwrite: true
+      -
+        name: Create release [PreRelease]
+        if: inputs.BaseImageTag == 'dev' || inputs.BaseImageTag == 'development-v6'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./digest_base_${{ inputs.BaseImageTag }}
+          release_name: ${{ inputs.BaseImageTag }}-${{ steps.version_code_check.outputs.VERSION_CODE }}
+          tag: ${{ inputs.BaseImageTag }}-${{ steps.version_code_check.outputs.VERSION_CODE }}
+          prerelease: true
+          overwrite: true
+      -
+        name: Update digest to file
+        run: |
+          BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/${{ inputs.BaseImageTag }} | grep -oP '"digest":"\K[^"]+' | tail -1)
+          echo "New Digest: $BASE_IMAGE_DIGEST"
+          echo $BASE_IMAGE_DIGEST > ./digest_base_${{ inputs.BaseImageTag }}
+      -
+        name: Push changes to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ $(git status) == *"nothing to commit, working tree clean"* ]]; then
+          exit 0
+          fi
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/origamiofficial/docker-pihole-bind9.git
+          git add ./digest_base_${{ inputs.BaseImageTag }}
+          git commit -m "Base Digest Updated"
+          git push

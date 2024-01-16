@@ -1,7 +1,8 @@
-name: Latest Build & Push
+name: Dev-v6 Build & Push
 on:
-  schedule:
-    - cron: '30 10 * * *'
+  workflow_dispatch:
+  #schedule:
+    #- cron: '0 11 * * *'
 
 jobs:
   job01:
@@ -19,8 +20,8 @@ jobs:
         name: Base image update check
         id: base_update_check
         run: |
-          BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/latest | grep -oP '"digest":"\K[^"]+' | tail -1)
-          PREVIOUS_DIGEST=$(cat ./digest_base_latest)
+          BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/development-v6 | grep -oP '"digest":"\K[^"]+' | tail -1)
+          PREVIOUS_DIGEST=$(cat ./digest_base_development-v6)
           if [ "$BASE_IMAGE_DIGEST" == "$PREVIOUS_DIGEST" ]; then
             echo "Base image has not been updated. Exiting..."
             echo "build_image=false" >> $GITHUB_OUTPUT
@@ -40,13 +41,6 @@ jobs:
         with:
           ref: main
       -
-        name: Version code
-        id: version_code_check
-        run: |
-          CHECK_VERSION_CODE=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/latest | grep -oP '"tag_last_pushed":"\K[^"]+' | tail -1 | cut -c 1-9 | sed 's/-/./g')
-          echo "New Version: $CHECK_VERSION_CODE"
-          echo VERSION_CODE=$CHECK_VERSION_CODE >> $GITHUB_OUTPUT
-      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       -
@@ -60,9 +54,9 @@ jobs:
           images: |
             ${{ secrets.DOCKERHUB_NAMESPACE }}/pihole-bind9
           flavor: |
-            latest=true
+            latest=false
           tags: |
-            type=raw,value=${{ steps.version_code_check.outputs.VERSION_CODE }}
+            type=raw,value=development-v6
       -
         name: Login to DockerHub
         uses: docker/login-action@v3
@@ -74,34 +68,39 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./
+          file: ./Dockerfile-Dev-V6
           platforms: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6, linux/386
-          build-args: BASE_IMG_TAG=latest
+          build-args: BASE_IMG_TAG=development-v6
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.latest
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.development-v6
           cache-to: |
-            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.latest,mode=max
+            type=registry,ref=${{ secrets.DOCKERHUB_NAMESPACE }}/docker-cache:buildcache.pihole-bind9.development-v6,mode=max
+      -
+        name: Version code
+        id: version_code_check
+        run: |
+          CHECK_VERSION_CODE=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/development-v6 | grep -oP '"tag_last_pushed":"\K[^"]+' | tail -1 | cut -c 1-9 | sed 's/-/./g')
+          echo "New Version: $CHECK_VERSION_CODE"
+          echo VERSION_CODE=$CHECK_VERSION_CODE >> $GITHUB_OUTPUT
       -
         name: Create release
         uses: svenstaro/upload-release-action@v2
         with:
-          body: |
-            ## What's Changed (Docker Image v${{ steps.version_code_check.outputs.VERSION_CODE }})
-            * Check Pi-hole Docker detailed changelog [here.](https://github.com/pi-hole/docker-pi-hole/releases/tag/${{ steps.version_code_check.outputs.VERSION_CODE }})
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./digest_base_latest
-          release_name: ${{ steps.version_code_check.outputs.VERSION_CODE }}
-          tag: ${{ steps.version_code_check.outputs.VERSION_CODE }}
-          make_latest: true
+          file: ./digest_base_development-v6
+          release_name: development-v6-${{ steps.version_code_check.outputs.VERSION_CODE }}
+          tag: development-v6-${{ steps.version_code_check.outputs.VERSION_CODE }}
+          prerelease: true
           overwrite: true
       -
         name: Update digest to file
         run: |
-          BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/latest | grep -oP '"digest":"\K[^"]+' | tail -1)
+          BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/development-v6 | grep -oP '"digest":"\K[^"]+' | tail -1)
           echo "New Digest: $BASE_IMAGE_DIGEST"
-          echo $BASE_IMAGE_DIGEST > ./digest_base_latest
+          echo $BASE_IMAGE_DIGEST > ./digest_base_development-v6
       -
         name: Push changes to repository
         env:
@@ -113,6 +112,6 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/origamiofficial/docker-pihole-bind9.git
-          git add ./digest_base_latest
+          git add ./digest_base_development-v6
           git commit -m "Base Digest Updated"
           git push
