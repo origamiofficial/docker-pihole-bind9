@@ -19,8 +19,20 @@ jobs:
         name: Base image update check
         id: base_update_check
         run: |
+          function validate_digest() {
+            local digest="$1"
+            if [[ ! "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+              echo "Error invalid digest format: $digest"
+              exit 0
+            fi
+          }
+          
           BASE_IMAGE_DIGEST=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/latest | grep -oP '"digest":"\K[^"]+' | tail -1)
+          validate_digest "$BASE_IMAGE_DIGEST"
+          
           PREVIOUS_DIGEST=$(cat ./digest_base_latest)
+          validate_digest "$PREVIOUS_DIGEST"
+          
           if [ "$BASE_IMAGE_DIGEST" == "$PREVIOUS_DIGEST" ]; then
             echo "Base image has not been updated. Exiting..."
             echo "build_image=false" >> $GITHUB_OUTPUT
@@ -43,7 +55,7 @@ jobs:
         name: Version code
         id: version_code_check
         run: |
-          CHECK_VERSION_CODE=$(curl -s https://registry.hub.docker.com/v2/repositories/pihole/pihole/tags/latest | grep -oP '"tag_last_pushed":"\K[^"]+' | tail -1 | cut -c 1-9 | sed 's/-/./g')
+          CHECK_VERSION_CODE=$(curl -s https://api.github.com/repos/pi-hole/docker-pi-hole/releases/latest | grep "name" | cut -d'"' -f 4 | tail -n 1)
           echo "New Version: $CHECK_VERSION_CODE"
           echo VERSION_CODE=$CHECK_VERSION_CODE >> $GITHUB_OUTPUT
       -
